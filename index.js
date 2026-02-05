@@ -51,11 +51,16 @@ function auto(w) {
 
 // ---- PARSER ----
 function parse(text) {
-  let w = text.toLowerCase().split(" ");
+  // normalize
+  text = text.toLowerCase().replace("-", " ").replace("  ", " ");
 
+  let w = text.split(" ");
+
+  // amount ရှာ
   let amount = w.find((x) => !isNaN(x));
   if (!amount) return null;
 
+  // currency detect
   let cur = "MMK";
 
   if (w.includes("inr") || w.includes("rupee") || w.includes("rupees"))
@@ -63,6 +68,7 @@ function parse(text) {
 
   if (w.includes("mmk") || w.includes("kyat")) cur = "MMK";
 
+  // ignore words
   let ignore = [
     "add",
     "ထည့်",
@@ -75,10 +81,13 @@ function parse(text) {
     "မနေ့",
   ];
 
+  // meaningful words ထုတ်
   let clean = w.filter((x) => !ignore.includes(x) && isNaN(x));
 
-  let category = auto(clean[0]);
+  // ⭐ USER KEYWORD EXACT ⭐
+  let category = clean[0] || "other";
 
+  // date detect
   let date = new Date();
   if (text.includes("yesterday") || text.includes("မနေ့"))
     date.setDate(date.getDate() - 1);
@@ -86,7 +95,7 @@ function parse(text) {
   return {
     amount: Number(amount),
     currency: cur,
-    category,
+    category, // 👈 user ရေးတဲ့အတိုင်း
     date: date.toDateString(),
   };
 }
